@@ -1,38 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useUser from "./hooks/useUser";
 
 function App() {
   const [userId, setUserId] = useState(1);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [retry, setRetry] = useState(0);
 
-  useEffect(() => {
-    async function fetchUser() {
-      setLoading(true);
-      setError(null);
-      setUser(null);
-
-      try {
-        const response = await fetch(
-          `https://jsonplaceholder.typicode.com/users/${userId}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch user");
-        }
-
-        const data = await response.json();
-        setUser(data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchUser();
-  }, [userId, retry]);
+  const { user, loading, error, retry } = useUser(userId);
 
   return (
     <div>
@@ -55,7 +27,7 @@ function App() {
       {error && (
         <div>
           <p>{error}</p>
-          <button onClick={() => setRetry(retry + 1)}>Retry</button>
+          <button onClick={retry}>Retry</button>
         </div>
       )}
 
