@@ -1,68 +1,72 @@
+import { useState } from "react";
 import useUsers from "../hooks/useUsers";
 import UserList from "./UserList";
-import { useState } from "react";
 import UserDetails from "./UserDetails";
 import SearchInput from "./SearchInput";
 import CompanyFilter from "./CompanyFilter";
 import ClearFilters from "./ClearFilters";
 
 function UserExplorer() {
-  const { users, loading, error, retry} = useUsers();
+  const { users, loading, error, retry } = useUsers();
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
   const [company, setCompany] = useState("");
 
   const filteredUsers = users.filter((user) => {
-  const matchesSearch = user.name
-    .toLowerCase()
-    .includes(search.toLowerCase());
+    const matchesSearch = user.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
 
-  const matchesCompany =
-    company === "" || user.company.name === company;
+    const matchesCompany =
+      company === "" || user.company.name === company;
 
-  return matchesSearch && matchesCompany;
-});
-  const companies = [...new Set(users.map((user) => user.company.name))];
+    return matchesSearch && matchesCompany;
+  });
 
-  if (loading) {
-    return <p>Loading users...</p>;
-  }
-
-  if (error) {
-    return (    <div>
-    <p>Error: {error}</p>;
-    <button onClick={retry}>retry</button>
-    </div>
-    )
-  }
-   if (users.length === 0) {
-    return <p>No users found</p>;
-  }
-
- 
+  const companies = [
+    ...new Set(users.map((user) => user.company.name)),
+  ];
 
   return (
     <div>
       <h1>User Explorer</h1>
-      <SearchInput value={search} onChange={setSearch} />
+
+      <SearchInput
+        value={search}
+        onChange={setSearch}
+      />
+
       <CompanyFilter
-            companies={companies}
-            value={company}
-            onChange={setCompany}
+        companies={companies}
+        value={company}
+        onChange={setCompany}
+      />
+
+      <ClearFilters
+        onClear={() => {
+          setSearch("");
+          setCompany("");
+        }}
+      />
+
+      {loading ? (
+        <p>Loading users...</p>
+      ) : error ? (
+        <div>
+          <p>Error: {error}</p>
+          <button onClick={retry}>Retry</button>
+        </div>
+      ) : filteredUsers.length > 0 ? (
+        <UserList
+          users={filteredUsers}
+          onSelectUser={setSelectedUser}
         />
-        <ClearFilters
-        onClear={() =>{
-            setSearch("");
-            setCompany("");
-        }}/>
-        {filteredUsers.length > 0 ? (
-      <UserList 
-      users={filteredUsers}
-      onSelectUser={setSelectedUser}/>
-        ) : (
-            <p>no users match your search of filter</p>
-        )}
-      <UserDetails user={selectedUser}/>
+      ) : (
+        <p>No users match your search or filter.</p>
+      )}
+
+      <UserDetails user={selectedUser} />
     </div>
   );
 }
