@@ -7,17 +7,22 @@ function useUsers() {
   const [retryCount, setRetryCount] = useState(0);
 
   function retry() {
-    setRetryCount((count) => count + 1)
+    setRetryCount((count) => count + 1);
   }
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchUsers() {
-        setLoading(true)
-        setError(null)
-        
+      setLoading(true);
+      setError(null);
+
       try {
         const response = await fetch(
-          "https://jsonplaceholder.typicode.com/users"
+          "https://jsonplaceholder.typicode.com/users",
+          {
+            signal: controller.signal,
+          }
         );
 
         if (!response.ok) {
@@ -28,13 +33,21 @@ function useUsers() {
 
         setUsers(data);
       } catch (error) {
-        setError(error.message);
-      }finally {
-        setLoading(false)
+        if (error.name !== "AbortError") {
+          setError(error.message);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchUsers();
+
+    return () => {
+      controller.abort();
+    };
   }, [retryCount]);
 
   return {
