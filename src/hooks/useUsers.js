@@ -4,9 +4,17 @@ function useUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  function retry() {
+    setRetryCount((count) => count + 1)
+  }
 
   useEffect(() => {
     async function fetchUsers() {
+        setLoading(true)
+        setError(null)
+        
       try {
         const response = await fetch(
           "https://jsonplaceholder.typicode.com/users"
@@ -27,12 +35,13 @@ function useUsers() {
     }
 
     fetchUsers();
-  }, []);
+  }, [retryCount]);
 
   return {
     users,
     loading,
     error,
+    retry,
   };
 }
 

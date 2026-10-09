@@ -7,7 +7,7 @@ import CompanyFilter from "./CompanyFilter";
 import ClearFilters from "./ClearFilters";
 
 function UserExplorer() {
-  const { users, loading, error } = useUsers();
+  const { users, loading, error, retry} = useUsers();
   const [selectedUser, setSelectedUser] = useState(null);
   const [search, setSearch] = useState("");
   const [company, setCompany] = useState("");
@@ -29,15 +29,17 @@ function UserExplorer() {
   }
 
   if (error) {
-    return <p>Error: {error}</p>;
+    return (    <div>
+    <p>Error: {error}</p>;
+    <button onClick={retry}>retry</button>
+    </div>
+    )
   }
    if (users.length === 0) {
     return <p>No users found</p>;
   }
 
-  if (filteredUsers.length === 0) {
-    return <p>No users match your search</p>;
-  }
+ 
 
   return (
     <div>
@@ -53,9 +55,13 @@ function UserExplorer() {
             setSearch("");
             setCompany("");
         }}/>
+        {filteredUsers.length > 0 ? (
       <UserList 
       users={filteredUsers}
       onSelectUser={setSelectedUser}/>
+        ) : (
+            <p>no users match your search of filter</p>
+        )}
       <UserDetails user={selectedUser}/>
     </div>
   );
